@@ -2,133 +2,49 @@ const canvas = document.getElementById('crazy_balls');
 const ctx = canvas.getContext('2d');
 
 
+
 //render canvas
+let size = {
+    width: window.innerWidth,
+    height: window.innerHeight
+}
+canvas.width= size.width;
+canvas.height = size.height;
 
-canvas.width= 500;
-canvas.height = 500;
-ctx.fillRect(0,0,500,500);
-
-
-
-/* class crazyBalls {
-    constructor(){
-
-    }
-
-
-} */
+console.log('inner'+ window.innerWidth)
+ctx.fillStyle="#ecf0f1";
+ctx.fillRect(0,0,canvas.width,canvas.height);
 
 
-/* function rand(val){
-    return Math.floor(Math.random()*val);
+let mouse = {
+    x: undefined,
+    y: undefined
 }
 
-class Vec {
-    constructor(x=0,y=0) {
-        this.x=x;
-        this.y=y;
-    }
-}
-
-class Arc {
-    constructor(r){
-        this.pos = new Vec;
-        this.r=r;
-    }
-}
+const maxRadius = 40;
 
 
-class CrazyBall extends Arc {
-    constructor(){
-        super(rand(30))
-        this.color= `rgb(${rand(256)},${rand(256)},${rand(256)})`;
-        this.pos.x = rand(canvas.width);
-        this.pos.y = rand(canvas.height);
-    }
-}
+let colorArray = [
+    '#9b59b6',
+    '#f8fa90',
+    '#AC9969',
+    '#9DCDC0',
+    '#28112B'
+];
 
 
-
-
-//draw circle
-
-
-let crazyBallsStorage = [];
-function ballsCreation (numb) {
-    let ball;
-      for(let i=0;i<numb;i++) {
-        ball = new CrazyBall;
-        crazyBallsStorage.push(ball);
-    }
-}
-ballsCreation(10);
-console.log(crazyBallsStorage.length)
-
-
-function draw() {
-    ctx.clearRect(0,0,canvas.width, canvas.height);
-
-    for(let i=0; i< crazyBallsStorage.length; i++) {
-        
-        let cbs= crazyBallsStorage[i];
-        ctx.fillStyle= cbs.color;
-        ctx.beginPath();
-        ctx.arc(cbs.pos.x,cbs.pos.y,cbs.r,0, 2* Math.PI);
-        ctx.fill(); 
-        
-    }
-
+window.addEventListener('mousemove', function(event) {
     
-}
+    mouse.x = event.x;
+    mouse.y = event.y;
+})
 
-
-
-function animate(){
-    dx=1;
-    crazyBallsStorage.forEach(element => { element.pos.x+=dx;
-        if (element.pos.x > canvas.width) {dx= -dx}
-        
-    });
-    draw();
-    
-    requestAnimationFrame(animate);
-}
-
-animate(); */
-
-
-/* class Circle{
-    constructor(x,y, dx, dy, radius){
-        this.x=x;
-        this.y=y;
-        this.dx = dx;
-        this.dy = dy;
-        this.radius = radius;
-        this.draw = () => {
-            ctx.beginPath();
-            ctx.arc(this.x,this.y, this.radius, 0,2*Math.PI);
-            ctx.strokeStyle= "blue";
-            ctx.stroke();
-        }
-        this.update = function() {
-            if ( this.x + this.radius> canvas.width || this.x - this.radius<0) {
-                this.dx = -this.dx;
-            }
-        
-            if ( this.y + this.radius> canvas.height || this.y - this.radius<0) {
-                this.dy = -this.dy;
-            }
-        
-            this.x+=this.dx;
-           this.y +=this.dy;
-           this.draw();
-
-        }
-    }
-
-} */
-
-
+window.addEventListener('resize',function(e){
+    console.log(e);
+    canvas.width=size.width;
+    canvas.height = size.height;
+    init();
+})
 
 class Circle{
     constructor(x,y, dx, dy, radius){
@@ -137,12 +53,15 @@ class Circle{
         this.dx = dx;
         this.dy = dy;
         this.radius = radius;
+        this.minRadius = radius;
+        this.color = Math.floor(Math.random()*colorArray.length);
     }
     draw() {
         ctx.beginPath();
         ctx.arc(this.x,this.y, this.radius, 0,2*Math.PI);
-        ctx.strokeStyle= "blue";
-        ctx.stroke();
+        ctx.fillStyle = colorArray[this.color];
+        
+        ctx.fill();
         
     }
     update () {
@@ -154,8 +73,17 @@ class Circle{
             this.dy = -this.dy;
         }
     
-        this.x+=this.dx;
+       this.x+=this.dx;
        this.y +=this.dy;
+       // interactivity
+      
+        if  (mouse.x - this.x < 50 && mouse.x -this.x > -50 
+            && mouse.y - this.y < 50 && mouse.y - this.y >-50          
+            ){
+            if (this.radius < maxRadius){this.radius +=1;}
+            
+        } else if (this.radius >  this.minRadius) {this.radius-=1;} ;
+
        this.draw();
 
     }
@@ -163,12 +91,15 @@ class Circle{
 };
 
 
-
-
 let ballsArr = [];
 
-for (let i = 0; i < 100; i++) {
-    let radius = 30
+
+
+function init() {
+    ballsArr = [];
+
+    for (let i = 0; i < 1000; i++) {
+    let radius = Math.floor(Math.random() * 5 + 1);
     let x = Math.random() * (canvas.width - radius * 2) + radius;
     let dx = (Math.random() -0.5);
     let y= Math.random() * (canvas.height - radius *2) + radius;
@@ -177,16 +108,14 @@ for (let i = 0; i < 100; i++) {
     ballsArr.push(new Circle(x,y,dx,dy,radius))
     
 }
+}
 
 
-
-console.log(ballsArr);
-
-
-
-function animete() {
-    requestAnimationFrame(animete);
+function animate() {
+    requestAnimationFrame(animate);
     ctx.clearRect(0,0,canvas.width,canvas.height)
+    ctx.fillStyle="#ecf0f1";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
     
     for (let i=0; i< ballsArr.length; i++){
         ballsArr[i].update();
@@ -194,4 +123,6 @@ function animete() {
  
 }
 
-animete();
+animate();
+
+init();
